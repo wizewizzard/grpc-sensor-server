@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  grpc-sensor-server:
+    build: ./
+    ports:
+      - "8090:8090"
+    links:
+      - "rmq:mqhost"
+    #    arguments for program
+    command: "-mqh mqhost"
+    depends_on:
+      rmq:
+        condition: service_healthy
+  rmq:
+    image: rabbitmq:3-alpine
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: "exit 0"

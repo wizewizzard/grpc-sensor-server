@@ -1,0 +1,121 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+package sensors;
+
+option java_package = "com.wz.sensors.proto";
+option java_outer_classname = "SensorProto";
+option java_multiple_files = true;
+
+enum SensorOnlineStatus {
+  UNKNOWN_STATUS = 0;
+  SENSOR_OFFLINE = 1;
+  SENSOR_ONLINE = 2;
+}
+
+message TokenResponse{
+  string token = 1;
+}
+
+message SensorRegistrationResponse{
+  string token = 1;
+  string id = 2;
+}
+
+message SensorRegistrationRequest{
+  string name = 1;
+  string location = 2;
+  repeated string tags = 3;
+};
+
+message MeasurementRequest{
+  double value = 1;
+  google.protobuf.Timestamp madeAt = 2;
+}
+
+message MeasurementResponse{
+  double value = 1;
+  string sensorId = 2;
+  google.protobuf.Timestamp madeAt = 3;
+}
+
+message SensorInfoResponse{
+  string id = 1;
+  string name = 2;
+  string location = 3;
+  repeated string tags = 4;
+  SensorOnlineStatus onlineStatus = 5;
+}
+
+message SensorHistoryRequest{
+  string sensorId = 1;
+  int32 depth = 2;
+}
+
+
+message SensorHistoryResponse{
+  repeated MeasurementResponse measurements = 1;
+  SensorOnlineStatus sensorStatus = 2;
+}
+
+message SearchTagsRequest{
+  repeated string tags = 1;
+}
+
+service SensorService{
+  rpc GetSensors(SearchTagsRequest) returns (stream SensorInfoResponse) {};
+  rpc GetHistoryForSensor(SensorHistoryRequest) returns (SensorHistoryResponse) {};
+  rpc RegisterSensor(SensorRegistrationRequest) returns (SensorRegistrationResponse) {};
+  rpc SendMeasurements(stream MeasurementRequest) returns (google.protobuf.Empty) {};
+}
+
+enum ActionSuccessStatus{
+  UNKNOWN = 0;
+  SUBSCRIPTION_SUCCESS = 1;
+  UNSUBSCRIPTION_SUCCESS = 2;
+  SUBSCRIPTION_FAILURE = 3;
+  INVALID_REQUEST = 4;
+  DISCONNECT_OK = 5;
+}
+
+message ClientRegistrationRequest{
+  string login = 1;
+  string password = 2;
+  string email = 3;
+};
+
+message ClientLoginRequest{
+  string login = 1;
+  string password = 2;
+};
+
+message SubscribeRequest{
+  string sensorId = 1;
+  int32 timeout = 2;
+  bool disconnect = 3;
+}
+
+message ActionResult{
+  string message = 1;
+  ActionSuccessStatus actionStatus = 2;
+}
+
+message OnlineStatusChange{
+    SensorOnlineStatus onlineStatus = 1;
+    string sensorId = 2;
+}
+
+message SubscriptionResponse{
+  oneof response{
+    MeasurementResponse measurement = 1;
+    ActionResult actionResult = 2;
+    OnlineStatusChange onlineStatusChange = 3;
+  }
+}
+
+service SensorClientService{
+  rpc RegisterClient(ClientRegistrationRequest) returns (TokenResponse) {};
+  rpc LoginClient(ClientLoginRequest) returns (TokenResponse) {};
+  rpc SubscribeOnSensor(stream SubscribeRequest) returns (stream SubscriptionResponse);
+}
