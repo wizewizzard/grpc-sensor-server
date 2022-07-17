@@ -13,7 +13,7 @@ To study this feature I used a setup of:
 
 ## Tech Stack
 
-**Server:** Java Core, gRPC, RabbitMQ
+**Server:** Java Core, gRPC, RabbitMQ, Docker
 
 ## Demo
 
