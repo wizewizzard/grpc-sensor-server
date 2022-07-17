@@ -18,7 +18,7 @@ To study this feature I used a setup of:
 ## Demo
 
 A schema of how it works.
-[schema](./schema.png)
+[schema](./schema.jpg)
 
 A .gif demonstrates how data is produced and consumed.
 [demo.gif](./demo.gif)
